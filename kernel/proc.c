@@ -684,3 +684,37 @@ procdump(void)
   }
 }
 
+struct proc *escalonador_loteria(void) 
+{
+  struct proc *p;
+  int total_tickets = 0;
+  int ticket_vencedor;
+  int tickets_atuais = 0;
+
+  // Calculando o total de tickets
+  for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+  {
+    if (p->state == RUNNABLE)
+    {
+      total_tickets += p->tickets;
+    }
+  }
+
+  if (total_tickets == 0)
+    return 0;
+
+  // Escolhendo o ticket vencedor
+  ticket_vencedor = rand() % total_tickets;
+
+  // Encontrando o processo com o ticket vencedor
+  for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+  {
+    if (p->state == RUNNABLE)
+    {
+      tickets_atuais += p->tickets;
+      if (tickets_atuais > ticket_vencedor)
+        return p;
+    }
+  }
+  return 0;
+}
