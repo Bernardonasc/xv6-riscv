@@ -454,24 +454,25 @@ scheduler(void)
     // Avoid deadlock by ensuring that devices can interrupt.
     intr_on();
 
-    for(p = proc; p < &proc[NPROC]; p++) {
+    acquire(&ptable.lock);
+    p = escalonador_loteria();
+    if (p != 0) {
+      // Mudar para o processo escolhido. É responsabilidade do processo
+      // liberar seu lock e depois readquiri-lo antes de voltar para nós.
       acquire(&p->lock);
-      if(p->state == RUNNABLE) {
-        // Switch to chosen process.  It is the process's job
-        // to release its lock and then reacquire it
-        // before jumping back to us.
-        p->state = RUNNING;
-        c->proc = p;
-        swtch(&c->context, &p->context);
+      p->state = RUNNING;
+      c->proc = p;
+      swtch(&c->context, &p->context);
 
-        // Process is done running for now.
-        // It should have changed its p->state before coming back.
-        c->proc = 0;
-      }
+      // O processo terminou de rodar por enquanto.
+      // Ele deve ter mudado seu estado antes de voltar.
+      c->proc = 0;
       release(&p->lock);
     }
+    release(&ptable.lock);
   }
 }
+
 
 // Switch to scheduler.  Must hold only p->lock
 // and have changed proc->state. Saves and restores
