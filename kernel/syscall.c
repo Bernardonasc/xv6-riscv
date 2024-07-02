@@ -145,3 +145,8 @@ syscall(void)
     p->trapframe->a0 = -1;
   }
 }
+
+extern uint64 sys_set_tickets(void);
+
+[SYS_set_tickets]  sys_set_tickets,
+

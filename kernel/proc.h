@@ -107,3 +107,9 @@ struct proc {
   
   int tickets;                 // Campo com quantidade de tickets do processo.
 };
+
+// Função do escalonador de loteria
+struct proc *escalonador_loteria(void);
+
+// Declaração do syscall set_tickets
+uint64 sys_set_tickets(void);
