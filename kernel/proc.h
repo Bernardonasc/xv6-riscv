@@ -106,6 +106,7 @@ struct proc {
   char name[16];               // Process name (debugging)
   
   int tickets;                 // Campo com quantidade de tickets do processo.
+  int ticks;                   // Número de ticks acumulados por este processo
 };
 
 // Função do escalonador de loteria

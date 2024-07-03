@@ -96,8 +96,8 @@ sys_set_tickets(void)
 {
   int tickets;
   struct proc *p = myproc();
-  if (argint(0, &tickets) < 0)
-    return -1;
+
+  argint(0, &tickets);
 
   if(tickets < 1)
     return -1;
