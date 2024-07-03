@@ -5,6 +5,7 @@
 #include "memlayout.h"
 #include "spinlock.h"
 #include "proc.h"
+#include "pstat.h"
 
 uint64
 sys_exit(void)
@@ -94,9 +95,46 @@ uint64
 sys_set_tickets(void)
 {
   int tickets;
+  struct proc *p = myproc();
   if (argint(0, &tickets) < 0)
     return -1;
-  struct proc *p = myproc();
+
+  if(tickets < 1)
+    return -1;
+
+  //Define o número de tickets do processo atual
   p->tickets = tickets;
   return 0;
+}
+
+uint64
+sys_getpinfo(void){
+  struct pstat *p;
+  if(argptr(0,(void*)&p, sizeof(*p)) < 0)
+    return -1;
+
+  struct proc *proc_atual = myproc();
+
+  // Adquire o lock do process table (ptable)
+  acquire(&ptable.lock);
+
+  // Itera sobre todos os processos no ptable
+  for(int i=0 ; i<NPROC ; i++){
+    // Se o processo está em uso, preenche os campos correspondentes na struct pstat
+    if(ptable.proc[i].state != UNUSED){
+      p->inuse[i] = 1;
+      p->tickets[i] = ptable.proc[i].tickets;
+      p->pid[i] = ptable.proc[i].pid;
+      p->ticks[i] = ptable.proc[i].ticks;
+    }
+    else{
+      // Se o processo não está em uso, define o campo inuse como 0
+      p->inuse[i] = 0;
+    }
+
+    // Libera o lock do process table
+    release(&ptable.lock);
+    
+    return 0;
+  }
 }

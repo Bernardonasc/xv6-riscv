@@ -89,6 +89,11 @@ myproc(void)
   return p;
 }
 
+struct {
+    struct spinlock lock;
+    struct proc proc[NPROC];
+} ptable;
+
 int
 allocpid()
 {
