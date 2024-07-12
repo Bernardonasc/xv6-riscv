@@ -112,11 +112,12 @@ struct proc {
 // Função do escalonador de loteria
 struct proc *escalonador_loteria(void);
 
-extern struct {
+struct ptable{
     struct spinlock lock;
     struct proc proc[NPROC];
-} ptable;
+};
 
+extern struct ptable ptable;
 // Declaração do syscall set_tickets
 uint64 sys_set_tickets(void);
 

@@ -92,7 +92,7 @@ sys_uptime(void)
 }
 
 uint64
-sys_set_tickets(void)
+sys_settickets(void)
 {
   int tickets;
   struct proc *p = myproc();
@@ -110,10 +110,10 @@ sys_set_tickets(void)
 uint64
 sys_getpinfo(void){
   struct pstat *p;
-  if(argptr(0,(void*)&p, sizeof(*p)) < 0)
-    return -1;
+  argstr(0,(void*)&p, sizeof(*p));
 
-  struct proc *proc_atual = myproc();
+  //sem 
+  //struct proc *proc_atual = myproc();
 
   // Adquire o lock do process table (ptable)
   acquire(&ptable.lock);
@@ -133,8 +133,7 @@ sys_getpinfo(void){
     }
 
     // Libera o lock do process table
-    release(&ptable.lock);
-    
-    return 0;
   }
+  release(&ptable.lock);
+  return 0;
 }

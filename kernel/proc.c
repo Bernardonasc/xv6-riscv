@@ -6,6 +6,8 @@
 #include "proc.h"
 #include "defs.h"
 
+struct ptable ptable;
+
 struct cpu cpus[NCPU];
 
 struct proc proc[NPROC];
@@ -29,6 +31,17 @@ struct spinlock wait_lock;
 // Allocate a page for each process's kernel stack.
 // Map it high in memory, followed by an invalid
 // guard page.
+static unsigned long next = 1;
+
+int rand(void) {
+    next = next * 1103515245 + 12345;
+    return (unsigned)(next / 65536) % 32768;
+}
+
+void srand(unsigned seed) {
+    next = seed;
+}
+
 void
 proc_mapstacks(pagetable_t kpgtbl)
 {
@@ -89,10 +102,14 @@ myproc(void)
   return p;
 }
 
-struct {
-    struct spinlock lock;
-    struct proc proc[NPROC];
-} ptable;
+void pinit(void) {
+    initlock(&ptable.lock, "ptable");
+}
+
+//struct {
+//    struct spinlock lock;
+//   struct proc proc[NPROC];
+//} ptable;
 
 int
 allocpid()
