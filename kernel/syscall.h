@@ -20,3 +20,8 @@
 #define SYS_link   19
 #define SYS_mkdir  20
 #define SYS_close  21
+#define SYS_setColor 22
+#define SYS_setTickets 23
+#define SYS_getpinfo 24
+#define SYS_ps 25
+#define SYS_test 26

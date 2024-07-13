@@ -5,6 +5,35 @@
 #include "memlayout.h"
 #include "spinlock.h"
 #include "proc.h"
+#include "pstat.h"
+
+uint64
+sys_setColor(void)
+{
+  int color_temp;
+  argint(0, &color_temp);
+  enum COLOR color = (enum COLOR)color_temp;
+  return setColor(color);
+}
+
+uint64
+sys_setTickets(void)
+{
+  int tickets;
+  argint(0, &tickets);
+  return setTickets(tickets);
+}
+
+uint64
+sys_getpinfo(void)
+{
+  uint64 p_temp;
+  struct pstat p;
+  argaddr(0, &p_temp);
+  getpinfo(&p);
+  either_copyout(1, p_temp, &p, sizeof(p));
+  return 0;
+}
 
 uint64
 sys_exit(void)

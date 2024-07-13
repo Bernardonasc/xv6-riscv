@@ -5,6 +5,20 @@
 #include "spinlock.h"
 #include "proc.h"
 #include "defs.h"
+#include "pstat.h"
+
+// Definições para o gerador de números pseudo-aleatórios
+static unsigned long next = 1;
+
+int rand(void) {
+  // Linear Congruential Generator (LCG) parameters
+  next = next * 1103515245 + 12345;
+  return (unsigned int)(next / 65536) % 32768;
+}
+
+void srand(unsigned int seed) {
+  next = seed;
+}
 
 struct cpu cpus[NCPU];
 
@@ -124,6 +138,7 @@ allocproc(void)
 found:
   p->pid = allocpid();
   p->state = USED;
+  p->tickets = 1;
 
   // Allocate a trapframe page.
   if((p->trapframe = (struct trapframe *)kalloc()) == 0){
@@ -299,6 +314,9 @@ fork(void)
   // copy saved user registers.
   *(np->trapframe) = *(p->trapframe);
 
+  // To ensure that a child inherits parent's tickets
+  np->tickets = p->tickets;
+
   // Cause fork to return 0 in the child.
   np->trapframe->a0 = 0;
 
@@ -452,21 +470,33 @@ scheduler(void)
     // Avoid deadlock by ensuring that devices can interrupt.
     intr_on();
 
+    int total_tickets = 0;
     for(p = proc; p < &proc[NPROC]; p++) {
       acquire(&p->lock);
       if(p->state == RUNNABLE) {
-        // Switch to chosen process.  It is the process's job
-        // to release its lock and then reacquire it
-        // before jumping back to us.
-        p->state = RUNNING;
-        c->proc = p;
-        swtch(&c->context, &p->context);
-
-        // Process is done running for now.
-        // It should have changed its p->state before coming back.
-        c->proc = 0;
+        total_tickets += p->tickets;
       }
       release(&p->lock);
+    }
+
+    if(total_tickets > 0) {
+      int winning_ticket = rand() % total_tickets;
+      for(p = proc; p < &proc[NPROC]; p++) {
+        acquire(&p->lock);
+        if(p->state == RUNNABLE) {
+          if((winning_ticket -= p->tickets) < 0) {
+            // Winning process.
+            p->state = RUNNING;
+            p->ticks++;
+            c->proc = p;
+            swtch(&c->context, &p->context);
+            c->proc = 0;
+            release(&p->lock);
+            break;
+          }
+        }
+        release(&p->lock);
+      }
     }
   }
 }
@@ -680,4 +710,52 @@ procdump(void)
     printf("%d %s %s", p->pid, state, p->name);
     printf("\n");
   }
+}
+
+int setColor(enum COLOR color) {
+
+  if (color < RED || color > VIOLET) {
+    return -1;
+  }
+
+  struct proc *p = myproc();
+  acquire(&p->lock);
+  p->color = color;
+  release(&p->lock);
+
+  return 0;
+}
+
+int setTickets(int tickets)
+{
+  if (tickets < 1 || tickets > 256) {
+    return -1;
+  }
+
+  struct proc *p = myproc();
+  acquire(&p->lock);
+  p->tickets = tickets;
+  release(&p->lock);
+  return 0;
+}
+
+int getpinfo(struct pstat *pst) {
+  if (!pst) {
+    return -1;
+  }
+
+  acquire(&pid_lock);
+  for(int i = 0; i < NPROC; i++) {
+    strncpy(pst->name[i], proc[i].name, sizeof(proc[i].name) - 1);
+    pst->name[i][sizeof(proc[i].name) - 1] = '\0';
+    pst->pid[i] = proc[i].pid;
+    pst->state[i] = proc[i].state;
+    pst->color[i] = proc[i].color;
+    pst->tickets[i] = proc[i].tickets;
+    pst->ticks[i] = proc[i].ticks;
+    pst->inuse[i] = (proc[i].state != UNUSED);
+  }
+  release(&pid_lock);
+
+  return 0;
 }
