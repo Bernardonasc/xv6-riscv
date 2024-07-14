@@ -714,7 +714,7 @@ procdump(void)
 
 int setTickets(int tickets)
 {
-  if (tickets < 1 || tickets > 256) {
+  if (tickets < 1) {
     return -1;
   }
 
