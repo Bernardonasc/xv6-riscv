@@ -19,23 +19,23 @@ void print_ticks() {
 }
 
 int main(void) {
-    int pid[3] = {0};
-    int tickets[] = {10, 20, 30};
-    for (int i = 0; i < 3; i++) {
+    int pid[11] = {0};
+    int tickets[] = {10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 256};
+    for (int i = 0; i <11; i++) {
         pid[i] = fork();
         if (pid[i] == 0) {
             setTickets(tickets[i]);
-            while(1);
+            while(5);
             printf("done\n");
             exit(0);
         }
     }
 
-    sleep(30);
+    sleep(300);
 
     print_ticks();
     
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 11; i++) {
         kill(pid[i]);
     }
 

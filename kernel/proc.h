@@ -81,20 +81,12 @@ struct trapframe {
 
 enum procstate { UNUSED, USED, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
 
-#ifndef MYCOLOR_H
-#define MYCOLOR_H
-
-enum COLOR { RED, ORANGE, YELLOW, GREEN, BLUE, INDIGO, VIOLET };
-
-#endif
-
 // Per-process state
 struct proc {
   struct spinlock lock;
 
   // p->lock must be held when using these:
   enum procstate state;        // Process state
-  enum COLOR color;            // Process color
   int tickets;                 // Number of tickets for lottery scheduling
   void *chan;                  // If non-zero, sleeping on chan
   int killed;                  // If non-zero, have been killed

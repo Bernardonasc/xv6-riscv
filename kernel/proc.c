@@ -712,20 +712,6 @@ procdump(void)
   }
 }
 
-int setColor(enum COLOR color) {
-
-  if (color < RED || color > VIOLET) {
-    return -1;
-  }
-
-  struct proc *p = myproc();
-  acquire(&p->lock);
-  p->color = color;
-  release(&p->lock);
-
-  return 0;
-}
-
 int setTickets(int tickets)
 {
   if (tickets < 1 || tickets > 256) {
@@ -750,7 +736,6 @@ int getpinfo(struct pstat *pst) {
     pst->name[i][sizeof(proc[i].name) - 1] = '\0';
     pst->pid[i] = proc[i].pid;
     pst->state[i] = proc[i].state;
-    pst->color[i] = proc[i].color;
     pst->tickets[i] = proc[i].tickets;
     pst->ticks[i] = proc[i].ticks;
     pst->inuse[i] = (proc[i].state != UNUSED);

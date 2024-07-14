@@ -8,15 +8,6 @@
 #include "pstat.h"
 
 uint64
-sys_setColor(void)
-{
-  int color_temp;
-  argint(0, &color_temp);
-  enum COLOR color = (enum COLOR)color_temp;
-  return setColor(color);
-}
-
-uint64
 sys_setTickets(void)
 {
   int tickets;
