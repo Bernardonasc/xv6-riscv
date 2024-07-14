@@ -30,6 +30,7 @@ exec(char *path, char **argv)
   struct proghdr ph;
   pagetable_t pagetable = 0, oldpagetable;
   struct proc *p = myproc();
+  int old_tickets = p->tickets;
 
   begin_op();
 
@@ -127,6 +128,8 @@ exec(char *path, char **argv)
   p->trapframe->epc = elf.entry;  // initial program counter = main
   p->trapframe->sp = sp; // initial stack pointer
   proc_freepagetable(oldpagetable, oldsz);
+
+  p->tickets = old_tickets;
 
   return argc; // this ends up in a0, the first argument to main(argc, argv)
 
