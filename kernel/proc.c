@@ -11,7 +11,6 @@
 static unsigned long next = 1;
 
 int rand(void) {
-  // Linear Congruential Generator (LCG) parameters
   next = next * 1103515245 + 12345;
   return (unsigned int)(next / 65536) % 32768;
 }
@@ -314,7 +313,7 @@ fork(void)
   // copy saved user registers.
   *(np->trapframe) = *(p->trapframe);
 
-  // To ensure that a child inherits parent's tickets
+  // Passa os tickets do pai para o filho
   np->tickets = p->tickets;
 
   // Cause fork to return 0 in the child.
@@ -712,7 +711,7 @@ procdump(void)
   }
 }
 
-int setTickets(int tickets)
+int settickets(int tickets)
 {
   if (tickets < 1) {
     return -1;

@@ -8,11 +8,11 @@
 #include "pstat.h"
 
 uint64
-sys_setTickets(void)
+sys_settickets(void)
 {
   int tickets;
   argint(0, &tickets);
-  return setTickets(tickets);
+  return settickets(tickets);
 }
 
 uint64

@@ -36,7 +36,7 @@ entry("getpid");
 entry("sbrk");
 entry("sleep");
 entry("uptime");
-entry("setTickets");
+entry("settickets");
 entry("getpinfo");
 entry("ps");
 entry("test");

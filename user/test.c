@@ -2,7 +2,7 @@
 #include "kernel/stat.h"
 #include "user/user.h"
 
-#define NUM_PROCESSES 11
+#define NUM_PROCESSES 3
 
 void display_process_info() {
     struct pstat process_stats;
@@ -12,37 +12,38 @@ void display_process_info() {
         exit(1);
     }
 
-    printf("NAME\tPID\tTICKETS\tTICKS\n");
     for (int i = 0; i < NPROC; i++) {
+        
         if (process_stats.inuse[i]) {
-            printf("%s\t%d\t%d\t%d\n", process_stats.name[i], process_stats.pid[i], process_stats.tickets[i], process_stats.ticks[i]);
+            if(process_stats.pid[i] > 3){
+                printf("%d\t%d\t%d\n", process_stats.pid[i], process_stats.tickets[i], process_stats.ticks[i]);
+            }
         }
     }
 }
 
 int main(void) {
-    int pids[NUM_PROCESSES];
-    int tickets[NUM_PROCESSES] = {10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 256};
+    int p[2];
+    int tickets[NUM_PROCESSES] = {30, 20, 10};
 
-    for (int i = 0; i < NUM_PROCESSES; i++) {
-        pids[i] = fork();
-        if (pids[i] == 0) {
-            setTickets(tickets[i]);
+	for(int i=0 ; i < NUM_PROCESSES ; i++){
+        p[i] = fork();
+        if(p[i] == 0){
+            settickets(tickets[i]);
             while(1);
-            exit(0);
-        } else if (pids[i] < 0) {
-            printf("Error: Fork failed for process %d\n", i);
-            exit(1);
         }
     }
 
-    sleep(300);
-
-    display_process_info();
+    printf("PID\tTICKETS\tTICKS\n");
+    for (int i = 0; i < 50 ; i++) {
+		sleep(10);
+		display_process_info();
+	}
+		
     
-    for (int i = 0; i < NUM_PROCESSES; i++) {
-        kill(pids[i]);
-    }
+    kill(p[1]);
+	kill(p[2]);
+	kill(p[3]);
 
     exit(0);
 }
