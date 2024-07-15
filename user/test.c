@@ -24,7 +24,7 @@ void display_process_info() {
 
 int main(void) {
     int p[2];
-    int tickets[NUM_PROCESSES] = {30, 20, 10};
+    int tickets[NUM_PROCESSES] = {10, 20, 30};
 
 	for(int i=0 ; i < NUM_PROCESSES ; i++){
         p[i] = fork();
@@ -35,8 +35,8 @@ int main(void) {
     }
 
     printf("PID\tTICKETS\tTICKS\n");
-    for (int i = 0; i < 50 ; i++) {
-		sleep(10);
+    for (int i = 0; i < 30 ; i++) {
+		sleep(15);
 		display_process_info();
 	}
 		

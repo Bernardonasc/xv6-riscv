@@ -314,7 +314,10 @@ fork(void)
   *(np->trapframe) = *(p->trapframe);
 
   // Passa os tickets do pai para o filho
+  // Usa lock para evitar condição de corrida
+  acquire(&p->lock);
   np->tickets = p->tickets;
+  release(&p->lock);
 
   // Cause fork to return 0 in the child.
   np->trapframe->a0 = 0;
@@ -469,22 +472,22 @@ scheduler(void)
     // Avoid deadlock by ensuring that devices can interrupt.
     intr_on();
 
-    int total_tickets = 0;
+    int total_lottery_tickets = 0;
     for(p = proc; p < &proc[NPROC]; p++) {
       acquire(&p->lock);
       if(p->state == RUNNABLE) {
-        total_tickets += p->tickets;
+        total_lottery_tickets += p->tickets;
       }
       release(&p->lock);
     }
 
-    if(total_tickets > 0) {
-      int winning_ticket = rand() % total_tickets;
+    if(total_lottery_tickets > 0) {
+      int chosen_ticket = rand() % total_lottery_tickets;
       for(p = proc; p < &proc[NPROC]; p++) {
         acquire(&p->lock);
         if(p->state == RUNNABLE) {
-          if((winning_ticket -= p->tickets) < 0) {
-            // Winning process.
+          chosen_ticket -= p->tickets;
+          if(chosen_ticket < 0) {
             p->state = RUNNING;
             p->ticks++;
             c->proc = p;
